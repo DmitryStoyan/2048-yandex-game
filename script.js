@@ -27,13 +27,37 @@ document.addEventListener("DOMContentLoaded", function () {
   let ysdk;
 
   function initGame(params) {
-    YaGames.init().then((ysdk) => {
-      console.log("Yandex SDK initialized");
-      window.ysdk = ysdk;
-    });
+    YaGames.init()
+      .then((_ysdk) => {
+        console.log("Yandex SDK инициализирован");
+        ysdk = _ysdk;
+        initPlayer(); // Вызов initPlayer() только после инициализации ysdk
+      })
+      .catch((error) => {
+        console.error("Ошибка инициализации Yandex SDK:", error);
+      });
+  }
+
+  function initPlayer() {
+    if (!ysdk || typeof ysdk.getPlayer !== "function") {
+      console.error(
+        "Ошибка: ysdk не определен или getPlayer() не является функцией"
+      );
+      return;
+    }
+    ysdk
+      .getPlayer()
+      .then((_player) => {
+        console.log("Данные игрока:", _player);
+        // Продолжайте операции, связанные с игроком
+      })
+      .catch((error) => {
+        console.error("Ошибка инициализации игрока:", error);
+      });
   }
 
   initGame();
+
   let newGameButton = document.querySelector(".new_game-button");
   let newGameButtonWin = document.querySelector(".win__game-Button");
   let gridContainer = document.querySelector(".grid__container");
@@ -46,9 +70,9 @@ document.addEventListener("DOMContentLoaded", function () {
   let fieldButton5x5 = document.querySelector(".field5x5");
   let fieldButton6x6 = document.querySelector(".field6x6");
   let fieldButton8x8 = document.querySelector(".field8x8");
-  let bgMusic = new Audio();
-  bgMusic.src = "/sounds/bacroundMusic.mp3";
-  bgMusic.volume = 0.3;
+  // let bgMusic = new Audio();
+  // bgMusic.src = "/sounds/bacroundMusic.mp3";
+  // bgMusic.volume = 0.3;
   let gridCell;
   let canUndo = true;
   let gridSize = 4;
@@ -74,43 +98,48 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   let player;
-  function initPlayer() {
-    return ysdk.getPlayer().then((_player) => {
-      player = _player;
-      console.log("данные пользователя", player);
-      return player;
-    });
-  }
+  // function initPlayer() {
+  //   return ysdk.getPlayer().then((_player) => {
+  //     player = _player;
+  //     console.log("данные пользователя", player);
+  //     return player;
+  //   });
+  // }
 
-  initPlayer()
-    .then((_player) => {
-      if (_player.getMode() === "lite") {
-        // Игрок не авторизован.
-        ysdk.auth
-          .openAuthDialog()
-          .then(() => {
-            // Игрок успешно авторизован
-            initPlayer().catch((err) => {
-              // Ошибка при инициализации объекта Player.
-            });
-          })
-          .catch(() => {
-            // Игрок не авторизован.
-            console.log("Игрок не авторизован.");
-            return ysdk.auth.openAuthDialog().then(() => {
-              return initPlayer();
-            });
-          });
-      } else {
-        // Игрок авторизован, сохраняем результаты очков на сервер
-        savesScoretoServer(score);
-      }
-    })
-    .catch((err) => {
-      // Ошибка при инициализации объекта Player.
-    });
+  // initPlayer()
+  //   .then((_player) => {
+  //     if (_player.getMode() === "lite") {
+  //       // Игрок не авторизован.
+  //       ysdk.auth
+  //         .openAuthDialog()
+  //         .then(() => {
+  //           // Игрок успешно авторизован
+  //           initPlayer().catch((err) => {
+  //             // Ошибка при инициализации объекта Player.
+  //           });
+  //         })
+  //         .catch(() => {
+  //           // Игрок не авторизован.
+  //           console.log("Игрок не авторизован.");
+  //           return ysdk.auth.openAuthDialog().then(() => {
+  //             return initPlayer();
+  //           });
+  //         });
+  //     } else {
+  //       // Игрок авторизован, сохраняем результаты очков на сервер
+  //       savesScoretoServer(score);
+  //     }
+  //   })
+  //   .catch((err) => {
+  //     // Ошибка при инициализации объекта Player.
+  //   });
 
   function savesScoretoServer(score) {
+    if (!player) {
+      console.error("Ошибка: объект player не был инициализирован.");
+      return;
+    }
+
     let data = {
       score: score,
     };
