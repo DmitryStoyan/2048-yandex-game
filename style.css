@@ -266,7 +266,8 @@ button {
 
 .menu {
   display: flex;
-  background-color: #ffde85;
+  /* background-color: #ffde85; */
+  background-color: #440d30;
   height: 100%;
   position: fixed;
   left: 0;
@@ -292,19 +293,19 @@ button {
 }
 
 .field5x5 {
-  background-image: url(/images/5x5.png);
+  background-image: url(images/5x5.png);
 }
 
 .field6x6 {
-  background-image: url(/images/6x6.png);
+  background-image: url(images/6x6.png);
 }
 
 .field8x8 {
-  background-image: url(/images/8x8.png);
+  background-image: url(images/8x8.png);
 }
 
 .field4x4 {
-  background-image: url(/images/4x4.png);
+  background-image: url(images/4x4.png);
 }
 
 .standings {

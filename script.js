@@ -24,16 +24,16 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  // let ysdk;
+  let ysdk;
 
-  // function initGame(params) {
-  //     YaGames.init().then((ysdk) => {
-  //         console.log("Yandex SDK initialized");
-  //         window.ysdk = ysdk;
-  //     });
-  // }
+  function initGame(params) {
+    YaGames.init().then((ysdk) => {
+      console.log("Yandex SDK initialized");
+      window.ysdk = ysdk;
+    });
+  }
 
-  // initGame();
+  initGame();
   let newGameButton = document.querySelector(".new_game-button");
   let newGameButtonWin = document.querySelector(".win__game-Button");
   let gridContainer = document.querySelector(".grid__container");
@@ -73,43 +73,56 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  // let player;
-  // function initPlayer() {
-  //     return ysdk.getPlayer().then(_player => {
-  //         player = _player;
-  //         return player;
-  //     });
-  // }
+  let player;
+  function initPlayer() {
+    return ysdk.getPlayer().then((_player) => {
+      player = _player;
+      console.log("данные пользователя", player);
+      return player;
+    });
+  }
 
-  // initPlayer().then(_player => {
-  //     if (_player.getMode() === 'lite') {
-  //         // Игрок не авторизован.
-  //         ysdk.auth.openAuthDialog().then(() => {
-  //             // Игрок успешно авторизован
-  //             initPlayer().catch(err => {
-  //                 // Ошибка при инициализации объекта Player.
-  //             });
-  //         }).catch(() => {
-  //             // Игрок не авторизован.
-  //         });
-  //     } else {
-  //       // Игрок авторизован, сохраняем результаты очков на сервер
-  //       savesScoretoServer(score)
-  //     }
-  // }).catch(err => {
-  //     // Ошибка при инициализации объекта Player.
-  // });
+  initPlayer()
+    .then((_player) => {
+      if (_player.getMode() === "lite") {
+        // Игрок не авторизован.
+        ysdk.auth
+          .openAuthDialog()
+          .then(() => {
+            // Игрок успешно авторизован
+            initPlayer().catch((err) => {
+              // Ошибка при инициализации объекта Player.
+            });
+          })
+          .catch(() => {
+            // Игрок не авторизован.
+            console.log("Игрок не авторизован.");
+            return ysdk.auth.openAuthDialog().then(() => {
+              return initPlayer();
+            });
+          });
+      } else {
+        // Игрок авторизован, сохраняем результаты очков на сервер
+        savesScoretoServer(score);
+      }
+    })
+    .catch((err) => {
+      // Ошибка при инициализации объекта Player.
+    });
 
-  // function savesScoretoServer(score) {
-  //     let data = {
-  //         score: score
-  //     }
-  //     player.setData(data, true).then(() => {
-  //         console.log('score успешно сохранён на сервер')
-  //     }).catch(error => {
-  //         console.error('ошибка при сохранении score на сервер', error)
-  //     })
-  // }
+  function savesScoretoServer(score) {
+    let data = {
+      score: score,
+    };
+    player
+      .setData(data, true)
+      .then(() => {
+        console.log("score успешно сохранён на сервер");
+      })
+      .catch((error) => {
+        console.error("ошибка при сохранении score на сервер", error);
+      });
+  }
 
   function handleKeyUp(event) {
     if (event.key === "ArrowRight" || event.code === "KeyD") {
@@ -389,6 +402,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function updateScore() {
     scoreText.innerText = score;
+    savesScoretoServer();
   }
 
   function closedMenu() {
