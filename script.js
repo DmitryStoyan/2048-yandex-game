@@ -25,6 +25,7 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   let ysdk;
+  let player;
 
   function initGame(params) {
     YaGames.init()
@@ -39,17 +40,11 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function initPlayer() {
-    if (!ysdk || typeof ysdk.getPlayer !== "function") {
-      console.error(
-        "Ошибка: ysdk не определен или getPlayer() не является функцией"
-      );
-      return;
-    }
     ysdk
       .getPlayer()
       .then((_player) => {
         console.log("Данные игрока:", _player);
-        // Продолжайте операции, связанные с игроком
+        player = _player;
       })
       .catch((error) => {
         console.error("Ошибка инициализации игрока:", error);
@@ -57,6 +52,31 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   initGame();
+
+  function savesScoretoServer(score) {
+    if (!player) {
+      console.error("Ошибка: объект player не был инициализирован.");
+      return;
+    }
+
+    let data = {
+      score: score,
+    };
+
+    if (JSON.stringify(data) === JSON.stringify(player.getData())) {
+      console.warn("Данные не изменились, сохранение не требуется.");
+      return;
+    }
+
+    player
+      .setData(data, true)
+      .then(() => {
+        console.log("score успешно сохранён на сервер");
+      })
+      .catch((error) => {
+        console.error("ошибка при сохранении score на сервер", error);
+      });
+  }
 
   let newGameButton = document.querySelector(".new_game-button");
   let newGameButtonWin = document.querySelector(".win__game-Button");
@@ -95,62 +115,6 @@ document.addEventListener("DOMContentLoaded", function () {
       });
       updateBoard();
     }
-  }
-
-  let player;
-  // function initPlayer() {
-  //   return ysdk.getPlayer().then((_player) => {
-  //     player = _player;
-  //     console.log("данные пользователя", player);
-  //     return player;
-  //   });
-  // }
-
-  // initPlayer()
-  //   .then((_player) => {
-  //     if (_player.getMode() === "lite") {
-  //       // Игрок не авторизован.
-  //       ysdk.auth
-  //         .openAuthDialog()
-  //         .then(() => {
-  //           // Игрок успешно авторизован
-  //           initPlayer().catch((err) => {
-  //             // Ошибка при инициализации объекта Player.
-  //           });
-  //         })
-  //         .catch(() => {
-  //           // Игрок не авторизован.
-  //           console.log("Игрок не авторизован.");
-  //           return ysdk.auth.openAuthDialog().then(() => {
-  //             return initPlayer();
-  //           });
-  //         });
-  //     } else {
-  //       // Игрок авторизован, сохраняем результаты очков на сервер
-  //       savesScoretoServer(score);
-  //     }
-  //   })
-  //   .catch((err) => {
-  //     // Ошибка при инициализации объекта Player.
-  //   });
-
-  function savesScoretoServer(score) {
-    if (!player) {
-      console.error("Ошибка: объект player не был инициализирован.");
-      return;
-    }
-
-    let data = {
-      score: score,
-    };
-    player
-      .setData(data, true)
-      .then(() => {
-        console.log("score успешно сохранён на сервер");
-      })
-      .catch((error) => {
-        console.error("ошибка при сохранении score на сервер", error);
-      });
   }
 
   function handleKeyUp(event) {
@@ -258,7 +222,7 @@ document.addEventListener("DOMContentLoaded", function () {
     return arr;
   }
 
-  function combineDown(row) {
+  function combineDown(row, score) {
     for (let i = gridSize - 1; i >= 1; i--) {
       let a = row[i];
       let b = row[i - 1];
@@ -268,10 +232,10 @@ document.addEventListener("DOMContentLoaded", function () {
         row[i - 1] = 0;
       }
     }
-    return row;
+    return { row, score };
   }
 
-  function combineRight(row) {
+  function combineRight(row, score) {
     for (let i = gridSize - 1; i > 0; i--) {
       let a = row[i];
       let b = row[i - 1];
@@ -281,7 +245,7 @@ document.addEventListener("DOMContentLoaded", function () {
         row[i - 1] = 0;
       }
     }
-    return row;
+    return { row, score };
   }
 
   function moveRight() {
@@ -387,7 +351,7 @@ document.addEventListener("DOMContentLoaded", function () {
     canUndo = true;
   }
 
-  function combineLeft(row) {
+  function combineLeft(row, score) {
     for (let i = 0; i <= 2; i++) {
       let a = row[i];
       let b = row[i + 1];
@@ -397,10 +361,14 @@ document.addEventListener("DOMContentLoaded", function () {
         row[i + 1] = 0;
       }
     }
-    return row;
+    return { row, score };
   }
 
   function slideLeft(row) {
+    if (!Array.isArray(row)) {
+      console.error("Ошибка: slideLeft ожидает аргумент типа массив");
+      return;
+    }
     let arr = row.filter((val) => val);
     let missing = gridSize * gridSize - arr.length;
     let zeros = Array(missing).fill(0);
@@ -431,7 +399,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function updateScore() {
     scoreText.innerText = score;
-    savesScoretoServer();
+    savesScoretoServer(score);
   }
 
   function closedMenu() {
@@ -489,7 +457,7 @@ document.addEventListener("DOMContentLoaded", function () {
   returnButton.addEventListener("click", function () {
     undoMove();
     console.log("returnButton");
-    ysdk.adv.showFullscreenAdv();
+    // ysdk.adv.showFullscreenAdv();
   });
 
   closeButton.addEventListener("click", function () {
