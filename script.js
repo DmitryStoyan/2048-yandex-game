@@ -32,7 +32,7 @@ document.addEventListener("DOMContentLoaded", function () {
       .then((_ysdk) => {
         console.log("Yandex SDK инициализирован");
         ysdk = _ysdk;
-        initPlayer(); // Вызов initPlayer() только после инициализации ysdk
+        initPlayer();
       })
       .catch((error) => {
         console.error("Ошибка инициализации Yandex SDK:", error);
@@ -71,7 +71,7 @@ document.addEventListener("DOMContentLoaded", function () {
     player
       .setData(data, true)
       .then(() => {
-        console.log("score успешно сохранён на сервер");
+        console.log("score успешно сохранён на сервер", score);
       })
       .catch((error) => {
         console.error("ошибка при сохранении score на сервер", error);
@@ -258,7 +258,9 @@ document.addEventListener("DOMContentLoaded", function () {
         row.push(cells[i + j].value);
       }
       row = slideRight(row);
-      row = combineRight(row);
+      let result = combineRight(row, score); // Передаем score в функцию combineRight
+      row = result.row;
+      score = result.score;
       row = slideRight(row);
       for (let j = 0; j < gridSize; j++) {
         cells[i + j].value = row[j];
@@ -280,7 +282,9 @@ document.addEventListener("DOMContentLoaded", function () {
         row.push(cells[i + gridSize - 1 - j].value);
       }
       row = slideRight(row);
-      row = combineRight(row);
+      let result = combineRight(row, score);
+      row = result.row;
+      score = result.score;
       row = slideRight(row);
       for (let j = 0; j < gridSize; j++) {
         cells[i + gridSize - 1 - j].value = row[j];
@@ -311,7 +315,9 @@ document.addEventListener("DOMContentLoaded", function () {
         row.push(cells[j].value);
       }
       row = slideLeft(row);
-      row = combineLeft(row);
+      let result = combineLeft(row, score);
+      row = result.row;
+      score = result.score;
       row = slideLeft(row);
       for (
         let j = i, k = 0;
@@ -335,7 +341,9 @@ document.addEventListener("DOMContentLoaded", function () {
         row.push(cells[j].value);
       }
       row = slideRight(row);
-      row = combineDown(row);
+      let result = combineDown(row, score);
+      row = result.row;
+      score = result.score;
       row = slideRight(row);
       for (
         let j = i, k = 0;
