@@ -1,6 +1,21 @@
 // import "./style.css";
 
 document.addEventListener("DOMContentLoaded", function () {
+  let score = 0;
+  let ysdk;
+  let player;
+  let playerData = {};
+
+  const platform = "yandex";
+  const platforms = {
+    yandex: "yandex",
+    other: "other",
+  };
+  const achivments = document.querySelector(".achivments");
+  achivments.addEventListener("click", () => {
+    initPlayer();
+    console.log(player.getData());
+  });
   const recordsButton = document.querySelector(".records");
   const modal = document.querySelector(".recordsModal");
   const standingsCloseButton = document.querySelector(
@@ -10,6 +25,7 @@ document.addEventListener("DOMContentLoaded", function () {
   recordsButton.addEventListener("click", function () {
     modal.classList.add("show-standings");
     document.body.classList.add("standings-open");
+    storage(storageCallback);
   });
 
   standingsCloseButton.addEventListener("click", function () {
@@ -24,9 +40,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  let ysdk;
-  let player;
-
   function initGame(params) {
     YaGames.init()
       .then((_ysdk) => {
@@ -40,9 +53,29 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function initPlayer() {
+    if (!ysdk) {
+      console.error("Ошибка: объект ysdk не был инициализирован.");
+      return;
+    }
     ysdk
-      .getPlayer()
+      .getPlayer({ scopes: true })
       .then((_player) => {
+        if (_player.getMode() === "lite") {
+          console.log("lite");
+          ysdk.auth
+            .openAuthDialog()
+            .then(() => {
+              // Игрок успешно авторизован.
+              initPlayer().catch((err) => {
+                // Ошибка при инициализации объекта Player.
+              });
+            })
+            .catch(() => {
+              // Игрок не авторизован.
+              ysdk.auth.openAuthDialog();
+              console.log("Игрок не авторизован.");
+            });
+        }
         console.log("Данные игрока:", _player);
         player = _player;
       })
@@ -51,31 +84,137 @@ document.addEventListener("DOMContentLoaded", function () {
       });
   }
 
-  initGame();
-
   function savesScoretoServer(score) {
     if (!player) {
       console.error("Ошибка: объект player не был инициализирован.");
       return;
     }
 
-    let data = {
-      score: score,
-    };
+    let currentPlayerId = player.getUniqueID();
+    let currentPlayerData = playerData[currentPlayerId];
 
-    if (JSON.stringify(data) === JSON.stringify(player.getData())) {
-      console.warn("Данные не изменились, сохранение не требуется.");
+    if (!currentPlayerData || score > currentPlayerData.bestScore) {
+      let newData = {
+        bestScore: score,
+        otherData: player.getData(),
+      };
+
+      playerData[currentPlayerId] = newData;
+
+      player
+        .setData(newData, true)
+        .then(() => {
+          console.log("Лучший счет успешно обновлён на сервере:", score);
+        })
+        .catch((error) => {
+          console.error("Ошибка при сохранении лучшего счета:", error);
+        });
+    } else {
+      console.warn("Новый счет не лучше текущего лучшего счета.");
+    }
+  }
+
+  function storage(loadcallback) {
+    if (!ysdk) {
+      console.error("Ошибка: объект ysdk не был инициализирован.");
       return;
     }
 
-    player
-      .setData(data, true)
-      .then(() => {
-        console.log("score успешно сохранён на сервер", score);
-      })
-      .catch((error) => {
-        console.error("ошибка при сохранении score на сервер", error);
-      });
+    if (platform == platforms.yandex) {
+      console.log("storage");
+      ysdk
+        .getPlayer()
+        .then((player) => {
+          player
+            .getData()
+            .then((data) => {
+              console.log("data load");
+              console.log(data);
+              console.log(player.getName());
+              storage.get = function (key) {
+                return data[key];
+              };
+              storage.set = function (key, value) {
+                data[key] = value;
+              };
+              storage.push = function () {
+                player.setData(data).then(() => {
+                  console.log("yandexsdk cloud push seccuss");
+                  console.log(data);
+                });
+              };
+
+              storage.type = 1;
+
+              storage.getraw = function () {
+                return data;
+              };
+
+              loadcallback();
+              console.log("привязка хранилища к облаку yandexsdk");
+            })
+            .catch((err) => {
+              lssave();
+            });
+        })
+        .catch((err) => {
+          lssave();
+        });
+    } else {
+      lssave();
+    }
+
+    function lssave() {
+      console.log("привязка хранилища к localStorage");
+      storage.get = function (key) {
+        return localStorage[key];
+      };
+      storage.set = function (key, value) {
+        localStorage[key] = value;
+      };
+      storage.push = function () {};
+      storage.getraw = function () {
+        return localStorage;
+      };
+      storage.type = 0;
+      loadcallback();
+    }
+  }
+
+  function storageCallback() {
+    createTable();
+  }
+
+  storage(storageCallback);
+
+  initGame();
+
+  function createTable() {
+    let tableBody = document.querySelector(".tournamentTable tbody");
+    tableBody.innerHTML = "";
+
+    Object.keys(playerData).forEach((playerId, index) => {
+      let playerInfo = playerData[playerId];
+      let row = document.createElement("tr");
+
+      // Место
+      let placeCell = document.createElement("td");
+      placeCell.textContent = index + 1;
+      row.appendChild(placeCell);
+
+      // Логин игрока (Yandex ID)
+      let loginCell = document.createElement("td");
+      loginCell.textContent = playerId;
+      row.appendChild(loginCell);
+
+      // Лучший счет
+      let bestScoreCell = document.createElement("td");
+      bestScoreCell.textContent = playerInfo.bestScore || 0;
+      row.appendChild(bestScoreCell);
+
+      // Добавляем строку в таблицу
+      tableBody.appendChild(row);
+    });
   }
 
   let newGameButton = document.querySelector(".new_game-button");
@@ -104,7 +243,6 @@ document.addEventListener("DOMContentLoaded", function () {
   let returnButton = document.querySelector(".return_button");
   let moveHistory = [];
   let cells = [];
-  let score = 0;
   // bgMusic.play()
   function undoMove() {
     if (moveHistory.length > 0 && canUndo) {
