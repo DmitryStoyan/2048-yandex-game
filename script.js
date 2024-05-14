@@ -11,34 +11,33 @@ document.addEventListener("DOMContentLoaded", function () {
     yandex: "yandex",
     other: "other",
   };
-  const achivments = document.querySelector(".achivments");
-  achivments.addEventListener("click", () => {
-    initPlayer();
-    console.log(player.getData());
-  });
+
   const recordsButton = document.querySelector(".records");
-  const modal = document.querySelector(".recordsModal");
+  const recordsModal = document.querySelector(".recordsModal");
   const standingsCloseButton = document.querySelector(
     ".standings__close-button"
   );
 
-  recordsButton.addEventListener("click", function () {
-    modal.classList.add("show-standings");
-    document.body.classList.add("standings-open");
-    storage(storageCallback);
-  });
+  function hideAdressBar() {
+    setTimeout(function () {
+      document.body.style.height = window.outerHeight + "px";
+      setTimeout(function () {
+        window.scrollTo(0, 1);
+      }, 1100);
+    }, 1000);
+    return false;
+  }
 
-  standingsCloseButton.addEventListener("click", function () {
-    modal.classList.remove("show-standings");
-    document.body.classList.remove("standings-open");
-  });
-
-  window.addEventListener("click", function (event) {
-    if (event.target === modal) {
-      modal.classList.remove("show-standings");
-      document.body.classList.remove("standings-open");
-    }
-  });
+  window.onload = function () {
+    hideAdressBar();
+    window.addEventListener(
+      "orientationchange",
+      function () {
+        hideAdressBar();
+      },
+      false
+    );
+  };
 
   function initGame(params) {
     YaGames.init()
@@ -95,6 +94,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (!currentPlayerData || score > currentPlayerData.bestScore) {
       let newData = {
+        username: player.getName(),
         bestScore: score,
         otherData: player.getData(),
       };
@@ -204,7 +204,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
       // Логин игрока (Yandex ID)
       let loginCell = document.createElement("td");
-      loginCell.textContent = playerId;
+      // loginCell.textContent = playerId;
+      loginCell.textContent = player.getName();
       row.appendChild(loginCell);
 
       // Лучший счет
@@ -217,6 +218,11 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
+  let achivmentsModal = document.querySelector(".achievements");
+  let achivmentsCloseButton = document.querySelector(
+    ".achievements__close-button"
+  );
+  let achivmentsButton = document.querySelector(".achievments-button");
   let newGameButton = document.querySelector(".new_game-button");
   let newGameButtonWin = document.querySelector(".win__game-Button");
   let gridContainer = document.querySelector(".grid__container");
@@ -603,7 +609,7 @@ document.addEventListener("DOMContentLoaded", function () {
   returnButton.addEventListener("click", function () {
     undoMove();
     console.log("returnButton");
-    // ysdk.adv.showFullscreenAdv();
+    ysdk.adv.showFullscreenAdv();
   });
 
   closeButton.addEventListener("click", function () {
@@ -633,5 +639,16 @@ document.addEventListener("DOMContentLoaded", function () {
   fieldButton4x4.addEventListener("click", function () {
     resizeGrid(4);
     closedMenu();
+  });
+
+  recordsButton.addEventListener("click", function () {
+    recordsModal.classList.add("show-standings");
+    document.body.classList.add("standings-open");
+    storage(storageCallback);
+  });
+
+  standingsCloseButton.addEventListener("click", function () {
+    recordsModal.classList.remove("show-standings");
+    document.body.classList.remove("standings-open");
   });
 });
