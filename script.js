@@ -5,6 +5,7 @@ document.addEventListener("DOMContentLoaded", function () {
   let ysdk;
   let player;
   let playerData = {};
+  let newData = {};
 
   const platform = "yandex";
   const platforms = {
@@ -66,6 +67,7 @@ document.addEventListener("DOMContentLoaded", function () {
             .then(() => {
               // Игрок успешно авторизован.
               initPlayer().catch((err) => {
+                console.log("Ошибка при инициализации объекта Player.2");
                 // Ошибка при инициализации объекта Player.
               });
             })
@@ -93,8 +95,8 @@ document.addEventListener("DOMContentLoaded", function () {
     let currentPlayerData = playerData[currentPlayerId];
 
     if (!currentPlayerData || score > currentPlayerData.bestScore) {
-      let newData = {
-        username: player.getName(),
+      newData = {
+        username: player.getName() || "Гость",
         bestScore: score,
         otherData: player.getData(),
       };
@@ -205,12 +207,13 @@ document.addEventListener("DOMContentLoaded", function () {
       // Логин игрока (Yandex ID)
       let loginCell = document.createElement("td");
       // loginCell.textContent = playerId;
-      loginCell.textContent = player.getName();
+      loginCell.textContent = playerInfo.username || "Гость";
       row.appendChild(loginCell);
 
       // Лучший счет
       let bestScoreCell = document.createElement("td");
-      bestScoreCell.textContent = playerInfo.bestScore || 0;
+      // bestScoreCell.textContent = playerInfo.bestScore || 0;
+      bestScoreCell.textContent = newData.bestScore || 0;
       row.appendChild(bestScoreCell);
 
       // Добавляем строку в таблицу
