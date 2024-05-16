@@ -13,12 +13,6 @@ document.addEventListener("DOMContentLoaded", function () {
     other: "other",
   };
 
-  const recordsButton = document.querySelector(".records");
-  const recordsModal = document.querySelector(".recordsModal");
-  const standingsCloseButton = document.querySelector(
-    ".standings__close-button"
-  );
-
   function hideAdressBar() {
     setTimeout(function () {
       document.body.style.height = window.outerHeight + "px";
@@ -96,7 +90,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (!currentPlayerData || score > currentPlayerData.bestScore) {
       newData = {
-        username: player.getName() || "Гость",
+        username: player.getName() || "Гость!",
         bestScore: score,
         otherData: player.getData(),
       };
@@ -207,7 +201,7 @@ document.addEventListener("DOMContentLoaded", function () {
       // Логин игрока (Yandex ID)
       let loginCell = document.createElement("td");
       // loginCell.textContent = playerId;
-      loginCell.textContent = playerInfo.username || "Гость";
+      loginCell.textContent = playerInfo.username;
       row.appendChild(loginCell);
 
       // Лучший счет
@@ -221,23 +215,24 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  let achivmentsModal = document.querySelector(".achievements");
-  let achivmentsCloseButton = document.querySelector(
-    ".achievements__close-button"
-  );
-  let achivmentsButton = document.querySelector(".achievments-button");
-  let newGameButton = document.querySelector(".new_game-button");
-  let newGameButtonWin = document.querySelector(".win__game-Button");
+  const recordsButton = document.querySelector(".records");
+  const recordsModal = document.querySelector(".recordsModal");
+  const achievementsButton = document.querySelector(".achievments-button");
+  const achievementsModal = document.querySelector(".achievementsModal");
+  const popupCloseButtons = document.querySelectorAll(".popup__close-button");
+  const newGameButton = document.querySelector(".new_game-button");
+  const newGameButtonWin = document.querySelector(".win__game-Button");
   let gridContainer = document.querySelector(".grid__container");
   let scoreText = document.querySelector(".score__text");
-  let gameContainerWin = document.querySelector(".game__container-win");
-  let closeButton = document.querySelector(".close");
-  let menu = document.querySelector(".menu");
-  let menuButton = document.querySelector(".menu-button");
-  let fieldButton4x4 = document.querySelector(".field4x4");
-  let fieldButton5x5 = document.querySelector(".field5x5");
-  let fieldButton6x6 = document.querySelector(".field6x6");
-  let fieldButton8x8 = document.querySelector(".field8x8");
+  const gameContainerWin = document.querySelector(".game__container-win");
+  const closeButton = document.querySelector(".close");
+  const menu = document.querySelector(".menu");
+  const menuButton = document.querySelector(".menu-button");
+  const fieldButton4x4 = document.querySelector(".field4x4");
+  const fieldButton5x5 = document.querySelector(".field5x5");
+  const fieldButton6x6 = document.querySelector(".field6x6");
+  const fieldButton8x8 = document.querySelector(".field8x8");
+  const returnButton = document.querySelector(".return_button");
   // let bgMusic = new Audio();
   // bgMusic.src = "/sounds/bacroundMusic.mp3";
   // bgMusic.volume = 0.3;
@@ -249,7 +244,6 @@ document.addEventListener("DOMContentLoaded", function () {
     y: null,
   };
 
-  let returnButton = document.querySelector(".return_button");
   let moveHistory = [];
   let cells = [];
   // bgMusic.play()
@@ -644,14 +638,43 @@ document.addEventListener("DOMContentLoaded", function () {
     closedMenu();
   });
 
+  function openPopup(popup) {
+    popup.classList.add("popup_opened");
+    document.addEventListener("click", closePopupOnBackgroundClick);
+    document.addEventListener("keydown", closePopupOnEscape);
+  }
+
+  function closePopup(popup) {
+    popup.classList.remove("popup_opened");
+    document.removeEventListener("click", closePopupOnBackgroundClick);
+    document.removeEventListener("keydown", closePopupOnEscape);
+  }
+
+  function closePopupOnEscape(event) {
+    if (event.key === "Escape") {
+      const popup = document.querySelector(".popup_opened");
+      closePopup(popup);
+    }
+  }
+
+  function closePopupOnBackgroundClick(event) {
+    if (event.target.classList.contains("popup_opened")) {
+      closePopup(event.target);
+    }
+  }
+
   recordsButton.addEventListener("click", function () {
-    recordsModal.classList.add("show-standings");
-    document.body.classList.add("standings-open");
-    storage(storageCallback);
+    openPopup(recordsModal);
   });
 
-  standingsCloseButton.addEventListener("click", function () {
-    recordsModal.classList.remove("show-standings");
-    document.body.classList.remove("standings-open");
+  achievementsButton.addEventListener("click", function () {
+    openPopup(achievementsModal);
+  });
+
+  popupCloseButtons.forEach((button) => {
+    button.addEventListener("click", function (event) {
+      const popup = event.target.closest(".popup");
+      closePopup(popup);
+    });
   });
 });
