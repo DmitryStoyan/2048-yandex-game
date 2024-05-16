@@ -101,6 +101,7 @@ document.addEventListener("DOMContentLoaded", function () {
         .setData(newData, true)
         .then(() => {
           console.log("Лучший счет успешно обновлён на сервере:", score);
+          checkAchievement(newData); // Проверяем достижения после обновления счёта
         })
         .catch((error) => {
           console.error("Ошибка при сохранении лучшего счета:", error);
@@ -244,6 +245,11 @@ document.addEventListener("DOMContentLoaded", function () {
     y: null,
   };
 
+  const achievementOne = document.querySelector(".achievement_one");
+  const achievementTwo = document.querySelector(".achievement_two");
+  const achievementThree = document.querySelector(".achievement_three");
+  const achievementFour = document.querySelector(".achievement_four");
+
   let moveHistory = [];
   let cells = [];
   // bgMusic.play()
@@ -276,6 +282,29 @@ document.addEventListener("DOMContentLoaded", function () {
         gameContainerWin.classList.add("game__container-win__active");
         document.removeEventListener("keyup", handleKeyUp);
       }
+    }
+  }
+
+  function checkAchievement(currentPlayerData) {
+    if (score >= 100 && !currentPlayerData.achievementOne) {
+      achievementOne.classList.add("achievement_done");
+      currentPlayerData.achievementOne = true;
+      alert("Открыто достижение 1: Набрать 100 очков");
+    }
+    if (score >= 500 && !currentPlayerData.achievementTwo) {
+      achievementTwo.classList.add("achievement_done");
+      currentPlayerData.achievementTwo = true;
+      alert("Открыто достижение 2: Набрать 500 очков");
+    }
+    if (score >= 3000 && !currentPlayerData.achievementThree) {
+      achievementThree.classList.add("achievement_done");
+      currentPlayerData.achievementThree = true;
+      alert("Открыто достижение 3: Набрать 3000 очков");
+    }
+    if (score >= 4000 && !currentPlayerData.achievementFour) {
+      achievementFour.classList.add("achievement_done");
+      currentPlayerData.achievementFour = true;
+      alert("Открыто достижение 4: Набрать 4000 очков");
     }
   }
 
@@ -555,7 +584,7 @@ document.addEventListener("DOMContentLoaded", function () {
     menu.classList.add("visibility-hidden");
   }
 
-  function openedMenu(params) {
+  function openedMenu() {
     menu.classList.remove("visibility-hidden");
   }
 
@@ -669,6 +698,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   achievementsButton.addEventListener("click", function () {
     openPopup(achievementsModal);
+    checkAchievement();
   });
 
   popupCloseButtons.forEach((button) => {
