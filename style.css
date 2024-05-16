@@ -329,7 +329,6 @@ button {
 }
 
 .popup {
-  display: none;
   position: fixed;
   z-index: 1000;
   left: 0;
@@ -338,6 +337,9 @@ button {
   height: 100%;
   overflow: auto;
   background-color: rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  visibility: hidden;
 }
 
 .popup-content {
@@ -387,6 +389,31 @@ button {
   background-color: #f2f2f2;
 }
 
+.notification {
+  position: absolute;
+  top: 10rem;
+  left: 5rem;
+  background-color: rgba(0, 0, 0, 0.7);
+  opacity: 0;
+  transition: opacity 1s ease;
+}
+
+.notification__wrapper {
+  display: flex;
+  align-items: center;
+}
+
+.notification__img {
+  width: 6rem;
+}
+
+.notification__text {
+  font-size: 2rem;
+  padding: 1rem 2rem;
+  color: #f2f2f2;
+}
+
 .popup_opened {
-  display: block;
+  visibility: visible;
+  opacity: 1;
 }

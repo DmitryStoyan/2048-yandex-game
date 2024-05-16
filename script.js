@@ -7,6 +7,11 @@ document.addEventListener("DOMContentLoaded", function () {
   let playerData = {};
   let newData = {};
 
+  let achievement1Unlocked = false;
+  let achievement2Unlocked = false;
+  let achievement3Unlocked = false;
+  let achievement4Unlocked = false;
+
   const platform = "yandex";
   const platforms = {
     yandex: "yandex",
@@ -108,6 +113,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     } else {
       console.warn("Новый счет не лучше текущего лучшего счета.");
+      checkAchievement(currentPlayerData);
     }
   }
 
@@ -216,6 +222,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
+  const notification = document.querySelector(".notification");
   const recordsButton = document.querySelector(".records");
   const recordsModal = document.querySelector(".recordsModal");
   const achievementsButton = document.querySelector(".achievments-button");
@@ -286,25 +293,65 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function checkAchievement(currentPlayerData) {
-    if (score >= 100 && !currentPlayerData.achievementOne) {
+    if (score >= 100 && !achievement1Unlocked) {
       achievementOne.classList.add("achievement_done");
       currentPlayerData.achievementOne = true;
-      alert("Открыто достижение 1: Набрать 100 очков");
+      achievement1Unlocked = true;
+      // alert("Открыто достижение 1: Набрать 100 очков");
+      notification.classList.add("popup_opened");
+      setTimeout(() => {
+        notification.classList.remove("popup_opened");
+        console.log("setTimeout");
+      }, 4000);
     }
-    if (score >= 500 && !currentPlayerData.achievementTwo) {
+    if (score >= 500 && !achievement2Unlocked) {
       achievementTwo.classList.add("achievement_done");
       currentPlayerData.achievementTwo = true;
-      alert("Открыто достижение 2: Набрать 500 очков");
+      achievement2Unlocked = true;
+      // alert("Открыто достижение 2: Набрать 500 очков");
+      notification.classList.add("popup_opened");
+      setTimeout(() => {
+        notification.classList.remove("popup_opened");
+        console.log("setTimeout");
+      }, 4000);
     }
-    if (score >= 3000 && !currentPlayerData.achievementThree) {
+    if (score >= 1000 && !achievement3Unlocked) {
       achievementThree.classList.add("achievement_done");
       currentPlayerData.achievementThree = true;
-      alert("Открыто достижение 3: Набрать 3000 очков");
+      achievement3Unlocked = true;
+      // alert("Открыто достижение 3: Набрать 1000 очков");
+      notification.classList.add("popup_opened");
+      setTimeout(() => {
+        notification.classList.remove("popup_opened");
+        console.log("setTimeout");
+      }, 4000);
     }
-    if (score >= 4000 && !currentPlayerData.achievementFour) {
+    if (score >= 5000 && !achievement4Unlocked) {
       achievementFour.classList.add("achievement_done");
       currentPlayerData.achievementFour = true;
-      alert("Открыто достижение 4: Набрать 4000 очков");
+      achievement4Unlocked = true;
+      // alert("Открыто достижение 4: Набрать 5000 очков");
+      notification.classList.add("popup_opened");
+      setTimeout(() => {
+        notification.classList.remove("popup_opened");
+        console.log("setTimeout");
+      }, 4000);
+    }
+
+    if (
+      !achievement1Unlocked ||
+      !achievement2Unlocked ||
+      !achievement3Unlocked ||
+      !achievement4Unlocked
+    ) {
+      player
+        .setData(currentPlayerData, true)
+        .then(() => {
+          console.log("Данные достижений успешно обновлены на сервере.");
+        })
+        .catch((error) => {
+          console.error("Ошибка при обновлении данных достижений:", error);
+        });
     }
   }
 
