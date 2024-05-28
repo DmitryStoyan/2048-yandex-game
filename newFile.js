@@ -1,5 +1,4 @@
 // import "./style.css";
-
 document.addEventListener("DOMContentLoaded", function () {
   let score = 0;
   let ysdk;
@@ -282,22 +281,6 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  function saveMove() {
-    let state = cells.map((cell) => cell.value);
-    moveHistory.push(state);
-  }
-
-  function setScore() {
-    let scoreValue = cells.reduce((acc, cell) => acc + cell.value, 0);
-    scoreText.textContent = scoreValue;
-    score = scoreValue;
-    if (player) {
-      savesScoretoServer(score);
-    }
-  }
-  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
   let moveHistory = [];
   let cells = [];
   function undoMove() {
@@ -502,9 +485,8 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function moveRight() {
-    saveMove();
-    // let currentState = cells.map((cell) => cell.value);
-    // moveHistory.push(currentState);
+    let currentState = cells.map((cell) => cell.value);
+    moveHistory.push(currentState);
 
     for (let i = 0; i < gridSize * gridSize; i += gridSize) {
       let row = [];
@@ -527,9 +509,8 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function moveLeft() {
-    // let currentState = cells.map((cell) => cell.value);
-    // moveHistory.push(currentState);
-    saveMove();
+    let currentState = cells.map((cell) => cell.value);
+    moveHistory.push(currentState);
 
     for (let i = 0; i < gridSize * gridSize; i += gridSize) {
       let row = [];
@@ -562,9 +543,8 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function moveUp() {
-    // let currentState = cells.map((cell) => cell.value);
-    // moveHistory.push(currentState);
-    saveMove();
+    let currentState = cells.map((cell) => cell.value);
+    moveHistory.push(currentState);
     for (let i = 0; i < gridSize * gridSize; i++) {
       let row = [];
       for (let j = i; j < cells.length; j += gridSize) {
@@ -589,9 +569,8 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function moveDown() {
-    // let currentState = cells.map((cell) => cell.value);
-    // moveHistory.push(currentState);
-    saveMove();
+    let currentState = cells.map((cell) => cell.value);
+    moveHistory.push(currentState);
     for (let i = gridSize - 1; i >= 0; i--) {
       let row = [];
       for (let j = i; j < cells.length; j += gridSize) {
@@ -658,7 +637,6 @@ document.addEventListener("DOMContentLoaded", function () {
         cell.element.classList.add("grid-cell-super");
       }
     }
-    setScore();
     updateScore();
     checkForWin();
   }
