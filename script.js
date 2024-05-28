@@ -136,45 +136,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  function savesScoretoServer(score) {
-    if (!player) {
-      console.error(
-        "Ошибка: объект player не был инициализирован. savesScoretoServer"
-      );
-      return;
-    }
-
-    console.log("savesScoretoServer function");
-
-    let currentPlayerId = player.getUniqueID();
-    let currentPlayerData = playerData[currentPlayerId];
-
-    if (!currentPlayerData || score > currentPlayerData.bestScore) {
-      newData = {
-        username: player.getName() || "Гость!",
-        bestScore: score,
-        score: score,
-        otherData: player.getData(),
-      };
-
-      playerData[currentPlayerId] = newData;
-
-      player
-        .setData(newData, true)
-        .then(() => {
-          console.log("Лучший счет успешно обновлён на сервере:", score);
-          checkAchievement(newData); // Проверяем достижения после обновления счёта
-          console.log(newData);
-        })
-        .catch((error) => {
-          console.error("Ошибка при сохранении лучшего счета:", error);
-        });
-    } else {
-      console.warn("Новый счет не лучше текущего лучшего счета.");
-      checkAchievement(currentPlayerData);
-    }
-  }
-
   function storage(loadcallback) {
     if (!ysdk) {
       console.error("Ошибка: объект ysdk не был инициализирован. storage");
@@ -332,63 +293,53 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  function checkAchievement(currentPlayerData) {
-    if (score >= 100 && !achievement1Unlocked) {
+  // function resetScore() {
+  //   score = 0;
+  //   scoreText.textContent = score;
+  // }
+
+  function checkAchievement(data) {
+    if (!data) {
+      console.error(
+        "Ошибка: объект data не определен в функции checkAchievement."
+      );
+      return;
+    }
+    if (data.bestScore >= 100 && !achievement1Unlocked) {
       achievementOne.classList.add("achievement_done");
-      currentPlayerData.achievementOne = true;
       achievement1Unlocked = true;
-      notification.classList.add("popup_opened");
-      setTimeout(() => {
-        notification.classList.remove("popup_opened");
-        console.log("setTimeout");
-      }, 4000);
-    }
-    if (score >= 500 && !achievement2Unlocked) {
-      achievementTwo.classList.add("achievement_done");
-      currentPlayerData.achievementTwo = true;
-      achievement2Unlocked = true;
-      notification.classList.add("popup_opened");
-      setTimeout(() => {
-        notification.classList.remove("popup_opened");
-        console.log("setTimeout");
-      }, 4000);
-    }
-    if (score >= 1000 && !achievement3Unlocked) {
-      achievementThree.classList.add("achievement_done");
-      currentPlayerData.achievementThree = true;
-      achievement3Unlocked = true;
-      notification.classList.add("popup_opened");
-      setTimeout(() => {
-        notification.classList.remove("popup_opened");
-        console.log("setTimeout");
-      }, 4000);
-    }
-    if (score >= 5000 && !achievement4Unlocked) {
-      achievementFour.classList.add("achievement_done");
-      currentPlayerData.achievementFour = true;
-      achievement4Unlocked = true;
-      notification.classList.add("popup_opened");
-      setTimeout(() => {
-        notification.classList.remove("popup_opened");
-        console.log("setTimeout");
-      }, 4000);
+      unlockAchievement(achievementOne, "Achievement 1 Unlocked!");
     }
 
-    if (
-      !achievement1Unlocked ||
-      !achievement2Unlocked ||
-      !achievement3Unlocked ||
-      !achievement4Unlocked
-    ) {
-      player
-        .setData(currentPlayerData, true)
-        .then(() => {
-          console.log("Данные достижений успешно обновлены на сервере.");
-        })
-        .catch((error) => {
-          console.error("Ошибка при обновлении данных достижений:", error);
-        });
+    if (data.bestScore >= 500 && !achievement2Unlocked) {
+      achievementTwo.classList.add("achievement_done");
+      achievement2Unlocked = true;
+      unlockAchievement(achievementTwo, "Achievement 2 Unlocked!");
     }
+
+    if (data.bestScore >= 1000 && !achievement3Unlocked) {
+      achievementThree.classList.add("achievement_done");
+      achievement3Unlocked = true;
+      unlockAchievement(achievementThree, "Achievement 3 Unlocked!");
+    }
+
+    if (data.bestScore >= 5000 && !achievement4Unlocked) {
+      achievementFour.classList.add("achievement_done");
+      achievement4Unlocked = true;
+      unlockAchievement(achievementFour, "Achievement 4 Unlocked!");
+    }
+  }
+
+  function unlockAchievement(element) {
+    element.classList.add("achievement_unlocked");
+    displayNotification();
+  }
+
+  function displayNotification() {
+    notification.classList.add("popup_opened");
+    setTimeout(() => {
+      notification.classList.remove("popup_opened");
+    }, 3000);
   }
 
   function createGrid() {
